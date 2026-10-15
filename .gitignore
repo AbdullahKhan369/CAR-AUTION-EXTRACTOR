@@ -1,0 +1,12 @@
+# Secrets (kabhi upload nahi)
+.env
+
+# WhatsApp login + Chrome login (inme account ki sessions hoti hain)
+wa-session/
+chrome-profile/
+.wwebjs_cache/
+
+# Bhari ya khud ban jane wali cheezein
+node_modules/
+public/cars/
+*.bak

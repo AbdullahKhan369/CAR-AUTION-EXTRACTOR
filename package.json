@@ -1,0 +1,21 @@
+{
+  "name": "car-quote-tool",
+  "version": "1.1.0",
+  "description": "Lot number -> car details + photos from pioneercarauc.ajes.com (List A) -> WhatsApp",
+  "main": "server.js",
+  "scripts": {
+    "start": "node launcher.js",
+    "dev": "node server.js",
+    "test": "node test-extract.js"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "puppeteer": "^22.15.0",
+    "whatsapp-web.js": "^1.26.0",
+    "qrcode": "^1.5.4"
+  },
+  "devDependencies": {
+    "jsdom": "^24.1.0"
+  }
+}

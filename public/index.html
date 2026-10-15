@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Car Quote Tool</title>
+<style>
+  :root{
+    --bg:#f4f6fb; --card:#ffffff; --text:#171a22; --muted:#6a7285; --border:#e3e7f0;
+    --primary:#4f46e5; --primary-2:#6d63ff; --primary-soft:#eef0ff;
+    --green:#16a34a; --green-soft:#e7f7ed; --red:#dc2626; --red-soft:#fdecec; --amber:#b45309; --amber-soft:#fff4e0;
+    --shadow:0 1px 2px rgba(20,25,50,.05),0 8px 24px rgba(20,25,50,.06);
+    --radius:16px;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --bg:#0f1220; --card:#181c2e; --text:#eceefb; --muted:#9aa2bd; --border:#2a3050;
+      --primary:#7c74ff; --primary-2:#9a93ff; --primary-soft:#23284a;
+      --green:#34d399; --green-soft:#12301f; --red:#f87171; --red-soft:#3a1a1c; --amber:#fbbf24; --amber-soft:#3a2d12;
+      --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px rgba(0,0,0,.35);
+    }
+  }
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{margin:0;background:#0b0e1a;color:var(--text);font:15px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif}
+  /* poori page ke peeche gari ki photo (bg.jpg, index.html ke sath public/ mein) */
+  body::before{content:"";position:fixed;inset:0;z-index:-1;
+    background:linear-gradient(180deg,rgba(8,10,24,.30),rgba(8,10,24,.60)),url("bg.jpg") center/cover no-repeat;}
+  .card,.panel,#wa,details,.tabs{background:color-mix(in srgb,var(--card) 90%,transparent);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
+  .status:not(:empty){align-self:flex-start;width:fit-content;max-width:100%;padding:8px 14px;border-radius:12px;background:color-mix(in srgb,var(--card) 92%,transparent)}
+  .wrap{max-width:900px;margin:0 auto;padding:0 16px 48px}
+
+  header.top{position:sticky;top:0;z-index:5;background:linear-gradient(135deg,#3b32d1,#6d63ff 60%,#8b7bff);color:#fff;box-shadow:0 6px 24px rgba(59,50,209,.28)}
+  header .in{max-width:900px;margin:0 auto;padding:14px 16px;display:flex;align-items:center;gap:12px;justify-content:space-between}
+  .brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:18px;letter-spacing:.2px}
+  .logo{width:34px;height:34px;border-radius:10px;background:rgba(255,255,255,.18);display:grid;place-items:center;font-size:18px}
+  #waPill{display:inline-flex;align-items:center;gap:7px;padding:6px 12px;border-radius:999px;background:rgba(255,255,255,.16);font-size:13px;font-weight:600;white-space:nowrap}
+  #waPill i{width:9px;height:9px;border-radius:50%;background:#fbbf24;display:inline-block}
+  #waPill.ok i{background:#4ade80;box-shadow:0 0 0 3px rgba(74,222,128,.3)}
+  #waPill.bad i{background:#f87171}
+
+  #wa{margin:16px 0 0;padding:14px 16px;border-radius:var(--radius);background:var(--card);border:1px solid var(--border);box-shadow:var(--shadow);font-size:14px}
+  #wa:empty,#wa.hide{display:none}
+  #wa .ok{color:var(--green);font-weight:700}
+  #wa .warn{color:var(--amber);font-weight:700}
+  #wa .bad{color:var(--red);font-weight:700}
+  #wa .sub{color:var(--muted);font-size:13px;margin-top:4px}
+  #wa img{display:block;margin-top:10px;width:220px;height:220px;border-radius:12px;border:1px solid var(--border)}
+
+  .tabs{display:inline-flex;gap:4px;margin:18px 0 14px;padding:4px;border-radius:12px;background:var(--card);border:1px solid var(--border)}
+  .tabs button{background:transparent;color:var(--muted);padding:8px 16px;border-radius:9px;font-weight:600;box-shadow:none}
+  .tabs button.on{background:var(--primary);color:#fff;box-shadow:0 4px 12px rgba(79,70,229,.35)}
+
+  button{font:inherit;font-weight:600;padding:10px 16px;border:0;border-radius:10px;background:var(--primary);color:#fff;cursor:pointer;transition:transform .05s,filter .15s,opacity .15s}
+  button:hover{filter:brightness(1.07)}
+  button:active{transform:translateY(1px)}
+  button:disabled{opacity:.5;cursor:not-allowed;filter:none}
+  button.green{background:var(--green);color:#fff}
+  button.gray{background:var(--primary-soft);color:var(--primary)}
+  button.red{background:var(--red)}
+  input[type=text]{font:inherit;padding:11px 14px;border:1px solid var(--border);border-radius:10px;background:var(--card);color:var(--text);outline:none;min-width:0}
+  input[type=text]:focus{border-color:var(--primary);box-shadow:0 0 0 3px var(--primary-soft)}
+
+  .panel{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:14px;box-shadow:var(--shadow)}
+  .bar{display:flex;gap:8px}
+  .bar input{flex:1}
+  .asrow input.km{width:190px;flex:none}
+
+  .toggle{display:flex;align-items:center;gap:12px;margin-top:12px;padding:10px 12px;border-radius:12px;background:var(--primary-soft);cursor:pointer;user-select:none}
+  .toggle .t{flex:1;font-size:14px}
+  .toggle .t b{display:block;font-size:14px}
+  .toggle .t span{color:var(--muted);font-size:12.5px}
+  .switch{position:relative;width:46px;height:26px;flex:none}
+  .switch input{position:absolute;opacity:0;inset:0;width:100%;height:100%;margin:0;cursor:pointer;z-index:2}
+  .switch .sl{position:absolute;inset:0;border-radius:999px;background:#b8bed3;transition:background .2s}
+  .switch .sl:before{content:"";position:absolute;left:3px;top:3px;width:20px;height:20px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.3);transition:transform .2s}
+  .switch input:checked + .sl{background:var(--primary)}
+  .switch input:checked + .sl:before{transform:translateX(20px)}
+  .switch input:focus-visible + .sl{box-shadow:0 0 0 3px var(--primary-soft)}
+
+  .status{min-height:22px;margin:14px 2px 4px;color:var(--muted);font-size:14px;display:flex;align-items:center;gap:8px}
+  .status.err{color:var(--red)}
+  .spin{width:16px;height:16px;border-radius:50%;border:2px solid var(--border);border-top-color:var(--primary);animation:sp .8s linear infinite;flex:none}
+  @keyframes sp{to{transform:rotate(360deg)}}
+
+  .card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin:14px 0;box-shadow:var(--shadow)}
+  .card h3{margin:0 0 2px;font-size:18px}
+  .card .meta{color:var(--muted);font-size:13px}
+  .card.asnet{border-left:4px solid var(--primary)}
+  .badge{display:inline-block;margin-right:8px;padding:2px 9px;border-radius:999px;background:var(--primary-soft);color:var(--primary);font-size:12px;font-weight:700;vertical-align:middle}
+  .imgs{display:grid;grid-template-columns:repeat(auto-fill,minmax(132px,1fr));gap:8px;margin:12px 0}
+  .imgs a{position:relative;display:block;border-radius:10px;overflow:hidden;background:var(--bg);aspect-ratio:4/3}
+  .imgs img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .2s}
+  .imgs a:hover img{transform:scale(1.05)}
+  .tag{position:absolute;top:6px;left:6px;background:#e8710a;color:#fff;font-size:11px;font-weight:700;padding:2px 7px;border-radius:6px}
+  textarea{width:100%;height:150px;padding:12px;font:inherit;line-height:1.5;border:1px solid var(--border);border-radius:12px;background:var(--bg);color:var(--text);resize:vertical;outline:none}
+  textarea:focus{border-color:var(--primary);box-shadow:0 0 0 3px var(--primary-soft)}
+  .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:12px}
+  .sendstat{font-size:14px;color:var(--muted)}
+  .sendstat.err,.err{color:var(--red)}
+  .sendstat.ok{color:var(--green)}
+  .abox{margin-top:4px}
+  .abox .status{margin:10px 2px 0}
+
+  details{margin-top:28px;border:1px solid var(--border);border-radius:var(--radius);padding:12px 16px;background:var(--card)}
+  summary{cursor:pointer;font-weight:700}
+  .tool{display:flex;gap:12px;align-items:center;margin:12px 0}
+  .tool button{min-width:210px}
+  .tool span{color:var(--muted);font-size:13px}
+  #toolmsg{font-size:14px;margin-top:6px}
+  .hide{display:none !important}
+  #overlay{display:none;position:fixed;inset:0;background:color-mix(in srgb,var(--bg) 92%,transparent);z-index:20;align-items:center;justify-content:center;text-align:center;font-size:18px;padding:20px}
+
+  @media (max-width:560px){
+    .bar{flex-wrap:wrap}
+    .asrow input.km{width:100%;flex:1 1 100%}
+    .tool{flex-direction:column;align-items:flex-start}
+    header .in{padding:12px}
+  }
+</style>
+</head>
+<body>
+<header class="top"><div class="in">
+  <div class="brand"><div class="logo">🚗</div>Car Quote Tool</div>
+  <div id="waPill"><i></i><span>WhatsApp...</span></div>
+</div></header>
+
+<div class="wrap">
+  <div id="wa"></div>
+
+  <div class="tabs">
+    <button id="tabBtnP" class="on">Pioneer</button>
+    <button id="tabBtnA">ASNET (photos)</button>
+  </div>
+
+  <div id="tabPioneer">
+    <div class="panel">
+      <div class="bar">
+        <input type="text" id="lot" placeholder="Lot number likho, jese 247" autofocus>
+        <button id="go">Search</button>
+      </div>
+      <label class="toggle" for="autoAsnet">
+        <div class="t"><b>Also search at ASNET (auto)</b>
+          <span>Pioneer se info aate hi lot + km se ASNET par khud search hoga. Sirf unn gariyon ke liye on rakho jinki photos Pioneer par nahi hain.</span></div>
+        <div class="switch"><input type="checkbox" id="autoAsnet"><span class="sl"></span></div>
+      </label>
+    </div>
+    <div id="status" class="status"></div>
+    <div id="out"></div>
+  </div>
+
+  <div id="tabAsnet" class="hide">
+    <div class="panel">
+      <div class="bar asrow">
+        <input type="text" id="alot" placeholder="Lot / listing number">
+        <input type="text" id="akm" class="km" placeholder="Mileage km (jese 67000)">
+        <button id="ago">ASNET search</button>
+      </div>
+    </div>
+    <div id="astatus" class="status"></div>
+    <div id="aout"></div>
+  </div>
+
+  <details id="tools">
+    <summary>Masla aa raha hai? (Troubleshoot)</summary>
+    <div class="tool">
+      <button id="bRecon">WhatsApp Reconnect</button>
+      <span>WhatsApp "connect nahi hai" ya atka ho to pehle ye dabao. QR dobara nahi lagta.</span>
+    </div>
+    <div class="tool">
+      <button id="bReset" class="gray">WhatsApp Reset (naya QR)</button>
+      <span>Reconnect se bhi na chale ya phone badalna ho to: purana link hat kar naya QR scan karna parega.</span>
+    </div>
+    <div class="tool">
+      <button id="bRestart" class="red">Server Restart</button>
+      <span>Search atak jaye ya sab ajeeb ho to: poora tool dobara chalta hai (20-30 second). WhatsApp khud connect ho jata hai.</span>
+    </div>
+    <div id="toolmsg"></div>
+  </details>
+</div>
+
+<div id="overlay"><div id="overlaytext"></div></div>
+
+<script>
+const $ = (id) => document.getElementById(id);
+function el(tag, props, ...kids) {
+  const e = document.createElement(tag);
+  Object.assign(e, props || {});
+  kids.flat().forEach((k) => e.append(k));
+  return e;
+}
+const store = {
+  get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } },
+  set(k, v) { try { localStorage.setItem(k, v); } catch (e) { /* ignore */ } },
+};
+
+async function api(path, opts) {
+  let r;
+  try { r = await fetch(path, opts); }
+  catch (e) { throw new Error('Server se rabta nahi ho raha (server band hai? Terminal check karo)'); }
+  let d;
+  try { d = await r.json(); }
+  catch (e) { throw new Error('Server ka jawab samajh nahi aaya'); }
+  if (d.ok === false) throw new Error(d.error || 'Error');
+  return d;
+}
+const post = (path, body) => api(path, {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify(body || {}),
+});
+
+/* status line: spinner ke sath ya bina */
+function setStatus(node, text, mode) {
+  node.textContent = '';
+  node.classList.toggle('err', mode === 'err');
+  if (mode === 'busy') node.append(el('span', { className: 'spin' }));
+  if (text) node.append(el('span', { textContent: text }));
+}
+
+/* ---------- WhatsApp status ---------- */
+let lastSig = '';
+let lastStatus = '';
+function setPill(cls, text) {
+  const p = $('waPill');
+  p.className = cls || '';
+  p.lastChild.textContent = text;
+}
+function renderWa(s) {
+  const sig = JSON.stringify([s.status, s.error, s.detail, s.qr, s.to]);
+  if (sig === lastSig) return;
+  lastSig = sig;
+  const box = $('wa');
+  box.textContent = '';
+  box.classList.remove('hide');
+  if (s.status === 'ready') {
+    setPill('ok', 'WhatsApp connected' + (s.to ? ' · ' + s.to : ''));
+    if (s.to) box.classList.add('hide');
+    else box.append(el('div', { className: 'sub', textContent: '.env mein CLIENT_NUMBER likho, phir Server Restart karo' }));
+  } else if (s.status === 'qr') {
+    setPill('', 'QR scan karo');
+    box.append(el('span', { className: 'warn', textContent: 'WhatsApp connect karo (sirf pehli baar)' }));
+    box.append(el('div', { className: 'sub', textContent: 'Phone mein WhatsApp, Linked devices, Link a device, aur ye QR scan karo' }));
+    if (s.qr) box.append(el('img', { src: s.qr }));
+  } else if (s.status === 'error') {
+    setPill('bad', 'WhatsApp error');
+    box.append(el('span', { className: 'bad', textContent: '● WhatsApp error' }));
+    box.append(el('div', { className: 'sub', textContent: (s.error || '') + ' (apne aap dobara koshish ho rahi hai; net/VPN check karo, ya Troubleshoot mein Reconnect dabao)' }));
+    if (lastStatus !== 'error') $('tools').open = true;
+  } else {
+    setPill('', 'WhatsApp connect ho raha hai...');
+    box.append(el('span', { className: 'warn', textContent: '● WhatsApp connect ho raha hai...' }));
+    box.append(el('div', { className: 'sub', textContent: s.detail || 'Pehli baar 1-2 minute lag sakte hain' }));
+  }
+  lastStatus = s.status;
+}
+async function waStatus() {
+  try { renderWa(await api('/api/wa/status')); }
+  catch (e) {
+    lastSig = '';
+    setPill('bad', 'Server band');
+    const box = $('wa');
+    box.textContent = '';
+    box.classList.remove('hide');
+    box.append(el('span', { className: 'bad', textContent: '● ' + e.message }));
+  }
+}
+waStatus();
+setInterval(waStatus, 3000);
+
+/* ---------- Cards (Pioneer + ASNET dono) ---------- */
+function buildCard(opts) {
+  // opts: title, meta, images [{url, sheet?}], message, extraBtn, badge, cls
+  const imgs = el('div', { className: 'imgs' }, opts.images.map((im) =>
+    el('a', { href: im.url, target: '_blank' },
+      el('img', { src: im.url, loading: 'lazy' }),
+      im.sheet ? el('span', { className: 'tag', textContent: 'Auction sheet' }) : [])));
+
+  const ta = el('textarea', { value: opts.message || '' });
+  const st = el('span', { className: 'sendstat' });
+  const send = el('button', { className: 'green', textContent: 'WhatsApp par bhejo (' + opts.images.length + ' photos + message)' });
+  let sentOnce = false;
+
+  send.onclick = async () => {
+    if (!ta.value.trim()) { st.textContent = 'Message khali hai'; st.className = 'sendstat err'; return; }
+    if (!opts.images.length) { st.textContent = 'Is gari ki photos nahi mili'; st.className = 'sendstat err'; return; }
+    if (sentOnce && !confirm('Ye pehle bheji ja chuki hai. Dobara bhejni hai?')) return;
+    send.disabled = true;
+    st.className = 'sendstat';
+    st.textContent = 'Bhej raha hun... (photos mein thora waqt lagta hai)';
+    try {
+      const d = await post('/api/wa/send', { text: ta.value, images: opts.images.map((im) => im.url) });
+      sentOnce = true;
+      st.textContent = 'Bhej diya ✓ (' + d.sent + ' photos)';
+      st.className = 'sendstat ok';
+      send.textContent = 'Dobara bhejo';
+    } catch (e) {
+      st.textContent = 'Error: ' + e.message;
+      st.className = 'sendstat err';
+    }
+    send.disabled = false;
+  };
+
+  return el('div', { className: 'card' + (opts.cls ? ' ' + opts.cls : '') },
+    el('h3', {}, opts.badge ? el('span', { className: 'badge', textContent: opts.badge }) : [], opts.title),
+    el('div', { className: 'meta', textContent: opts.meta }),
+    imgs, ta,
+    el('div', { className: 'row' }, send, opts.extraBtn || [], st));
+}
+
+/* ---------- ASNET search (teeno jagah yahi chalta hai) ---------- */
+// p: { lot, km, chassis, year, message, box (cards yahan), statusEl }
+async function runAsnet(p) {
+  p.box.textContent = '';
+  setStatus(p.statusEl, 'ASNET par dhoond raha hun... (30-60 second lag sakte hain)', 'busy');
+  try {
+    const q = '?km=' + encodeURIComponent(p.km || '') +
+      '&chassis=' + encodeURIComponent(p.chassis || '') +
+      '&year=' + encodeURIComponent(p.year || '');
+    const d = await api('/api/asnet/' + encodeURIComponent(p.lot) + q);
+    setStatus(p.statusEl, d.note || (d.cars.length > 1 ? d.cars.length + ' gariyan mili, sahi wali chuno:' : ''));
+    d.cars.forEach((c) => {
+      p.box.append(buildCard({
+        title: 'Lot ' + c.lot + (c.km ? ' · ' + c.km + ' km' : ''),
+        badge: 'ASNET',
+        cls: 'asnet',
+        meta: c.info,
+        images: c.images,
+        message: p.message || '',
+      }));
+    });
+    return true;
+  } catch (e) {
+    setStatus(p.statusEl, 'ASNET error: ' + e.message, 'err');
+    return false;
+  }
+}
+
+/* ---------- Pioneer cards ---------- */
+function render(cars) {
+  const out = $('out');
+  out.textContent = '';
+  return cars.map((c) => {
+    const wrap = el('div');
+    const abox = el('div', { className: 'abox' });
+    const astatus = el('div', { className: 'status' });
+    const asBtn = el('button', { className: 'gray', textContent: 'ASNET se aur photos (' + c.images.length + ' mili)' });
+    let card;
+    const run = async () => {
+      asBtn.disabled = true;
+      await runAsnet({
+        lot: c.lot,
+        km: (c.mileage || '').replace(/\D/g, ''),
+        chassis: c.chassis || '',
+        year: c.year || '',
+        message: card.querySelector('textarea').value,
+        box: abox,
+        statusEl: astatus,
+      });
+      asBtn.disabled = false;
+    };
+    asBtn.onclick = run;
+    card = buildCard({
+      title: [c.model, c.year].filter(Boolean).join(' '),
+      meta: 'Lot ' + c.lot + ' · ' + [c.auction, c.date].filter(Boolean).join(' '),
+      images: c.images,
+      message: c.message,
+      extraBtn: asBtn,
+    });
+    wrap.append(card, astatus, abox);
+    out.append(wrap);
+    return run;
+  });
+}
+
+/* ---------- Tabs ---------- */
+function showTab(t) {
+  $('tabPioneer').classList.toggle('hide', t !== 'P');
+  $('tabAsnet').classList.toggle('hide', t !== 'A');
+  $('tabBtnP').classList.toggle('on', t === 'P');
+  $('tabBtnA').classList.toggle('on', t === 'A');
+}
+$('tabBtnP').onclick = () => showTab('P');
+$('tabBtnA').onclick = () => showTab('A');
+
+/* ---------- Auto toggle (yaad rehta hai) ---------- */
+$('autoAsnet').checked = store.get('cq_auto_asnet') === '1';
+$('autoAsnet').onchange = (e) => store.set('cq_auto_asnet', e.target.checked ? '1' : '0');
+
+/* ---------- ASNET tab (manual) ---------- */
+async function asnetManual() {
+  const lot = $('alot').value.trim();
+  if (!lot) return;
+  $('ago').disabled = true;
+  await runAsnet({ lot, km: $('akm').value.trim(), message: '', box: $('aout'), statusEl: $('astatus') });
+  $('ago').disabled = false;
+}
+$('ago').onclick = asnetManual;
+$('alot').addEventListener('keydown', (e) => { if (e.key === 'Enter') asnetManual(); });
+$('akm').addEventListener('keydown', (e) => { if (e.key === 'Enter') asnetManual(); });
+
+/* ---------- Pioneer search ---------- */
+let searchSeq = 0;
+async function search() {
+  const lot = $('lot').value.trim();
+  if (!lot) return;
+  const mine = ++searchSeq;
+  $('go').disabled = true;
+  $('out').textContent = '';
+  setStatus($('status'), 'Dhoond raha hun...', 'busy');
+  try {
+    const data = await api('/api/lot/' + encodeURIComponent(lot));
+    if (mine !== searchSeq) return;
+    if (!data.cars.length) {
+      setStatus($('status'), 'Lot ' + lot + ' List A mein nahi mila. Pehle usay website par List A mein add karo.');
+    } else {
+      setStatus($('status'), data.cars.length > 1
+        ? 'Lot ' + lot + ' ke ' + data.cars.length + ' results mile (alag auctions). Sahi wala chuno:' : '');
+      const runs = render(data.cars);
+      $('go').disabled = false;
+      // toggle on ho to info aate hi lot + km se ASNET khud, ek ke baad ek
+      if ($('autoAsnet').checked) {
+        for (const run of runs) {
+          if (mine !== searchSeq) break;
+          await run();
+        }
+      }
+    }
+  } catch (e) {
+    if (mine === searchSeq) setStatus($('status'), 'Error: ' + e.message, 'err');
+  } finally {
+    if (mine === searchSeq) $('go').disabled = false;
+  }
+}
+$('go').onclick = search;
+$('lot').addEventListener('keydown', (e) => { if (e.key === 'Enter') search(); });
+
+/* ---------- Troubleshoot buttons ---------- */
+function toolMsg(text, bad) {
+  const m = $('toolmsg');
+  m.textContent = text;
+  m.className = bad ? 'err' : '';
+}
+async function runTool(btn, path, okText, confirmText) {
+  if (confirmText && !confirm(confirmText)) return;
+  btn.disabled = true;
+  toolMsg('Ho raha hai...');
+  try {
+    await post(path);
+    toolMsg(okText);
+    lastSig = '';
+    waStatus();
+  } catch (e) { toolMsg('Error: ' + e.message, true); }
+  btn.disabled = false;
+}
+$('bRecon').onclick = (e) => runTool(e.target, '/api/wa/reconnect', 'Reconnect shuru ho gaya. Upar status dekho (20-60 second).');
+$('bReset').onclick = (e) => runTool(e.target, '/api/wa/reset', 'Reset ho gaya. Thori der mein naya QR upar aayega, usay scan karo.',
+  'Purana WhatsApp link hat jayega aur naya QR scan karna parega. Pakka?');
+
+function showOverlay(text) {
+  $('overlaytext').textContent = text;
+  $('overlay').style.display = 'flex';
+}
+$('bRestart').onclick = async () => {
+  if (!confirm('Server restart karna hai? 20-30 second lagenge.')) return;
+  let oldPid = null;
+  try { oldPid = (await api('/api/health')).pid; } catch (e) { /* ignore */ }
+  try { await post('/api/restart'); }
+  catch (e) { toolMsg('Restart nahi hua: ' + e.message, true); return; }
+  showOverlay('Server restart ho raha hai... (20-30 second, page khud khul jayega)');
+  const t0 = Date.now();
+  const timer = setInterval(async () => {
+    try {
+      const h = await api('/api/health');
+      if (h.pid !== oldPid) { clearInterval(timer); location.reload(); }
+    } catch (e) { /* abhi band hai */ }
+    if (Date.now() - t0 > 120000) {
+      clearInterval(timer);
+      showOverlay('Restart mein zyada waqt lag raha hai. Terminal dekho, phir ye page refresh karo.');
+    }
+  }, 2000);
+};
+</script>
+</body>
+</html>

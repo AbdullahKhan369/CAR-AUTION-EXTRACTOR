@@ -1,0 +1,10 @@
+1) Node.js install hona chahiye (nodejs.org, LTS)
+2) Is folder mein terminal kholo:  npm install   (sirf pehli baar ya nayi package aaye to)
+3) ".env.example" ko copy karke ".env" naam do. Usme likho: AJES_USER, AJES_PASS, CLIENT_NUMBER
+4) Hamesha  npm start  se chalao (npm run dev se "Server Restart" button kaam nahi karega)
+5) Browser mein kholo: http://localhost:3000
+
+WhatsApp: pehli baar upar QR dikhega, phone se scan karo (Linked devices). Uske baad session yaad rehta hai,
+server restart par khud connect hota hai.
+Troubleshoot (page ke neeche): WhatsApp Reconnect, WhatsApp Reset (naya QR), Server Restart.
+Masla aaye to .env mein SHOW_BROWSER=1 ya WA_SHOW=1 kar do, Chrome window dikhegi.
