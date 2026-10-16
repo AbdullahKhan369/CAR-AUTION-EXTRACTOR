@@ -6,6 +6,7 @@ const { buildMessage } = require('./format');
 const { getYenPerEur } = require('./pricing');
 const wa = require('./wa');
 const { findAsnet } = require('./asnet');
+const batch = require('./batch');
 
 // WhatsApp/Chrome ke andar ke unhandled errors se poora server na girey
 process.on('unhandledRejection', (e) => console.error('Unhandled:', e && e.message ? e.message : e));
@@ -36,6 +37,15 @@ app.get('/api/asnet/:lot', async (req, res) => {
     res.status(500).json({ ok: false, error: e.message });
   }
 });
+
+// Auto batch (Pioneer List A): UI ek ek gari maangta hai, server 15 par khud rok deta hai
+app.post('/api/batch/start', (req, res) => res.json({ ok: true, ...batch.start() }));
+app.post('/api/batch/next', async (req, res) => {
+  try { res.json({ ok: true, ...(await batch.next()) }); }
+  catch (e) { console.error(e); res.status(500).json({ ok: false, error: e.message }); }
+});
+app.get('/api/batch/recent', (req, res) => res.json({ ok: true, cars: batch.getRecent() }));
+app.post('/api/batch/reset', (req, res) => { batch.reset(); res.json({ ok: true }); });
 
 app.get('/api/wa/status', (req, res) => {
   res.set('Cache-Control', 'no-store');

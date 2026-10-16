@@ -4,7 +4,7 @@
 //   FA 1500 cc Hybrid
 //   67000 km
 //   Grade 4.5
-//   3700€ to 4300€     <- avg price + margin, euro mein, +-300
+//   3900€ to 4300€     <- avg price + margin, euro mein, -100 / +300
 const { marginFor, priceRange } = require('./pricing');
 
 // avg nahi -> sirf "€"; 30 lac se upar -> "Price unknown"; rate na mile -> saaf nishani (bhejne se pehle dikhe)

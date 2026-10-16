@@ -309,8 +309,13 @@ function eraOf(y) {
 }
 
 function findAsnet(lotRaw, kmRaw, extra) {
+  return enqueue(() => findAsnetRun(lotRaw, kmRaw, extra));
+}
+
+// Queue ke ANDAR se (batch.js) seedha chalane ke liye. Bahar se hamesha findAsnet use karo.
+function findAsnetRun(lotRaw, kmRaw, extra) {
   extra = extra || {};
-  return enqueue(async () => {
+  return (async () => {
     const lot = String(parseInt(String(lotRaw).replace(/\D/g, ''), 10));
     if (lot === 'NaN') throw new Error('Lot number sirf digits hona chahiye');
     if (lot.length > 5) throw new Error('ASNET AA listing number 5 digit tak hota hai');
@@ -381,7 +386,7 @@ function findAsnet(lotRaw, kmRaw, extra) {
       if (page) { try { dump('asnet-error.html', await page.content()); } catch (x) { /* ignore */ } }
       throw friendly(e);
     }
-  });
+  })();
 }
 
-module.exports = { findAsnet, parseKms };
+module.exports = { findAsnet, findAsnetRun, parseKms };

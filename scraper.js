@@ -324,4 +324,6 @@ function findLot(lot) {
 module.exports = {
   findLot, closeBrowser, getBrowser, enqueue, friendly, OUT_DIR,
   getSitePage, loginAllowed, loginFailed, loginOk, touch, sessionFresh, politeDelay, sleep,
+  // batch.js ke liye
+  ensureSession, loadListA, getDetailImages, saveImages, LIST_TTL, getListCache: () => listCache,
 };

@@ -31,8 +31,8 @@ check('fuel hybrid', hy.fuel, 'Hybrid');
 // 3) avg price maujood ho (hidden div ka 4th hissa)
 const av = run(html.replace('yen|30000|0|0', 'yen|30000|0|1250000'))[0];
 check('avgYen', av.avgYen, 1250000);
-// 1,250,000 + 410,000 = 1,660,000 yen / 177 = 9378 -> 9400 -> 9100€ to 9700€
-check('avg message', buildMessage(av, 177).split('\n').pop(), '9100€ to 9700€');
+// 1,250,000 + 410,000 = 1,660,000 yen / 177 = 9378 -> 9400 -> 9300€ to 9700€
+check('avg message', buildMessage(av, 177).split('\n').pop(), '9300€ to 9700€');
 check('avg rate nahi', buildMessage(av, 0).split('\n').pop(), '€ (exchange rate nahi mila)');
 check('avg 30 lac se upar', buildMessage({ ...av, avgYen: 3500000 }, 177).split('\n').pop(), 'Price unknown');
 
@@ -45,11 +45,13 @@ check('margin 1000000', marginFor(1000000), 390000);
 check('margin 1000001', marginFor(1000001), 410000);
 check('margin 3000000', marginFor(3000000), 480000);
 check('margin 3000001', marginFor(3000001), null);
-const ex = eurRange(710000, 176.7); // 4018 EUR -> 4000 -> 3700 / 4300
+const ex = eurRange(710000, 176.7); // 4018 EUR -> 4000 -> 3900 / 4300
 check('example eur', ex.eur, 4018);
-check('example low', ex.low, 3700);
+check('example low', ex.low, 3900);
 check('example high', ex.high, 4300);
 check('priceRange', priceRange(340000, 177).finalYen, 710000);
+const ex2 = eurRange(4100 * 177, 177); // user ka example: 4100 -> 4000 to 4400
+check('user example 4100', ex2.low + '-' + ex2.high, '4000-4400');
 
 // 4) user ke diye hue 2 example (exact format, ab aakhir mein avg line)
 check('honda', buildMessage({ model: 'HONDA FIT', year: '2016', colour: 'NAVY BLUE', chassis: 'GP5', grade: 'L PACKAGE', gearbox: 'FA', cc: '1500', fuel: 'Hybrid', mileage: '67000 km', rating: '4.5' }),

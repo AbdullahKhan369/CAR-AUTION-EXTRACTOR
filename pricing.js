@@ -1,5 +1,5 @@
-// Quote price: Pioneer ki average price (yen) + hamara margin -> euro mein convert -> rounding -> -300 / +300.
-//   710000 yen -> 4018 EUR -> round 4000 -> "3700€ to 4300€"
+// Quote price: Pioneer ki average price (yen) + hamara margin -> euro mein convert -> rounding -> -100 / +300.
+//   710000 yen -> 4018 EUR -> round 4000 -> "3900€ to 4300€"   (4100 -> "4000€ to 4400€")
 const fs = require('fs');
 const path = require('path');
 
@@ -12,7 +12,8 @@ const BRACKETS = [
   [2500000, 457500],
   [3000000, 480000],
 ];
-const SPREAD_EUR = 300;   // final euro price se itna kam / zyada
+const SPREAD_LOW = 100;   // rounded euro price se itna kam
+const SPREAD_HIGH = 300;  // rounded euro price se itna zyada
 const ROUND_TO = 100;     // euro ko nazdeeki 100 par round (4018 -> 4000)
 
 // avg yen -> margin. 30 lac se upar (ya galat value) ho to null = "price unknown"
@@ -27,7 +28,7 @@ function marginFor(avgYen) {
 function eurRange(finalYen, yenPerEur) {
   const eur = finalYen / yenPerEur;
   const rounded = Math.round(eur / ROUND_TO) * ROUND_TO;
-  return { eur: Math.round(eur), rounded, low: rounded - SPREAD_EUR, high: rounded + SPREAD_EUR };
+  return { eur: Math.round(eur), rounded, low: rounded - SPREAD_LOW, high: rounded + SPREAD_HIGH };
 }
 
 // avg yen -> poora result (null agar price unknown)
